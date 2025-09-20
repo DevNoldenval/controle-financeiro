@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Controle Financeiro Familiar</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1976d2" />
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script defer src="app.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    button { margin: 5px; padding: 8px 12px; }
+    form { display: grid; grid-template-columns: repeat(auto-fill,minmax(120px,1fr)); gap:10px; margin-bottom:20px; }
+    input, select { padding:6px; }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    th, td { border:1px solid #ccc; padding:6px; text-align:left; }
+    th { background:#f4f4f4; }
+    #filtroResponsavel { margin-left:5px; padding:6px; }
+  </style>
+</head>
+<body>
+  <div>
+    <button id="btn-login">Login com Google</button>
+    <button id="btn-logout" style="display:none;">Logout</button>
+  </div>
+
+  <div id="view-transacoes">
+    <label for="filtroResponsavel">Filtrar por:</label>
+    <select id="filtroResponsavel">
+      <option value="">Todos</option>
+      <option value="Usuário">Você</option>
+      <option value="Esposa">Esposa</option>
+    </select>
+
+    <form id="lancamentoForm">
+      <input type="date" name="data" required />
+      <input type="text" name="responsavel" placeholder="Quem?" required />
+      <input type="number" name="valor" placeholder="Valor" step="0.01" required />
+      <select name="tipo">
+        <option value="despesa">Despesa</option>
+        <option value="receita">Receita</option>
+      </select>
+      <input type="text" name="cartao" placeholder="Cartão" />
+      <input type="number" name="parcelas" placeholder="Parcelas" />
+      <input type="text" name="categoria" placeholder="Categoria" />
+      <input type="text" name="subcategoria" placeholder="Subcategoria" />
+      <input type="text" name="descricao" placeholder="Descrição" />
+      <label><input type="checkbox" name="fixo" /> Fixo</label>
+      <button type="submit">Lançar</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th><th>Quem</th><th>Valor</th><th>Tipo</th>
+          <th>Cartão</th><th>Parcelas</th><th>Categoria</th>
+          <th>Subcategoria</th><th>Descrição</th><th>Fixo</th>
+        </tr>
+      </thead>
+      <tbody id="transacoesBody"></tbody>
+    </table>
+  </div>
+</body>
+</html>
