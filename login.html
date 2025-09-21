@@ -312,8 +312,21 @@
         window.onload = function() {
             console.log("Page loaded");
             
-            // Limpar qualquer sessão existente para forçar o login
-            localStorage.removeItem('userInfo');
+            // Verificar se há um usuário salvo no localStorage
+            const savedUser = localStorage.getItem('userInfo');
+            if (savedUser) {
+                try {
+                    const userInfo = JSON.parse(savedUser);
+                    if (userInfo.token && userInfo.email) {
+                        // Se já estiver logado, redirecionar para o dashboard
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Erro ao analisar dados do usuário:', e);
+                    localStorage.removeItem('userInfo');
+                }
+            }
             
             // Inicializar o Google Sign-In
             initializeGoogleSignIn();
