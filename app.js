@@ -1,128 +1,114 @@
-const CLIENT_ID = '149224581281-7d5rqr12io40f7rr9mleoit7ttpd1etf.apps.googleusercontent.com';
-const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
-const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
-const SPREADSHEET_ID = '1qhcen9CBgYR0-70-kKt4PG_eQVsxRYGS8GSQiu8cnDY';
-const API_URL = 'https://script.google.com/macros/s/AKfycbwLgIiMo4R7aOzfYwkvo9H5OrTjEVP7L4NfyFtCaVmMasShI8Vvu1iyAwB676xlaYD7/exec';
+// Dados simulados para exemplo (substitua pelos seus dados reais)
+const transacoes = [
+  { data: '2025-09-01', responsavel: 'Você', valor: 3000, tipo: 'receita', categoria: 'Salário', descricao: 'Salário Setembro' },
+  { data: '2025-09-05', responsavel: 'Esposa', valor: 500, tipo: 'despesa', categoria: 'Supermercado', descricao: 'Compras semanais' },
+  { data: '2025-09-10', responsavel: 'Você', valor: 200, tipo: 'despesa', categoria: 'Transporte', descricao: 'Uber' },
+  { data: '2025-09-12', responsavel: 'Você', valor: 150, tipo: 'despesa', categoria: 'Lazer', descricao: 'Cinema' },
+  { data: '2025-09-15', responsavel: 'Esposa', valor: 2500, tipo: 'receita', categoria: 'Freelance', descricao: 'Projeto web' },
+  { data: '2025-09-20', responsavel: 'Você', valor: 100, tipo: 'despesa', categoria: 'Alimentação', descricao: 'Almoço' },
+];
 
-function handleClientLoad() {
-  gapi.load('client:auth2', initClient);
-}
-
-function initClient() {
-  gapi.client.init({
-    clientId: CLIENT_ID,
-    discoveryDocs: DISCOVERY_DOCS,
-    scope: SCOPES
-  }).then(() => {
-    updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-    gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+// Preencher filtro de categorias
+function populaFiltroCategorias() {
+  const filtro = document.getElementById('filterCategory');
+  const categorias = [...new Set(transacoes.map(t => t.categoria))];
+  filtro.innerHTML = '<option value="">Todas</option>';
+  categorias.forEach(c => {
+    const option = document.createElement('option');
+    option.value = c;
+    option.textContent = c;
+    filtro.appendChild(option);
   });
 }
 
-function updateSigninStatus(isSignedIn) {
-  document.getElementById('btn-login').style.display = isSignedIn ? 'none' : 'inline-block';
-  document.getElementById('btn-logout').style.display = isSignedIn ? 'inline-block' : 'none';
-  if (isSignedIn) {
-    loadAllData();
-  }
-}
-
-function handleAuthClick() {
-  gapi.auth2.getAuthInstance().signIn();
-}
-
-function handleSignoutClick() {
-  gapi.auth2.getAuthInstance().signOut();
-}
-
-function loadAllData() {
-  fetch(`${API_URL}?sheet=Transacoes`)
-    .then((res) => res.json())
-    .then((json) => {
-      populateTransactions(json.data || []);
-      syncPendentes();
-    })
-    .catch((err) => console.error('Erro ao ler via Apps Script:', err));
-}
-
-function appendTransaction(rowArray) {
-  return fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'create',
-      sheet: 'Transacoes',
-      data: rowArray
-    })
-  }).then((res) => res.json());
-}
-
-document.getElementById('lancamentoForm').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const form = event.target;
-  const row = [
-    form.data.value,
-    form.responsavel.value,
-    form.valor.value,
-    form.tipo.value,
-    form.cartao.value,
-    form.parcelas.value || '',
-    form.categoria.value,
-    form.subcategoria.value,
-    form.descricao.value,
-    form.fixo.checked ? 'Sim' : 'Não'
-  ];
-
-  appendTransaction(row)
-    .then((res) => {
-      if (res.success) {
-        loadAllData();
-      } else {
-        throw new Error('Falha no append');
-      }
-    })
-    .catch(() => {
-      savePendentes(row);
-      alert('Sem conexão. Lançamento salvo localmente e será sincronizado depois.');
-    });
-});
-
-function savePendentes(row) {
-  const pend = JSON.parse(localStorage.getItem('pendentes') || '[]');
-  pend.push(row);
-  localStorage.setItem('pendentes', JSON.stringify(pend));
-}
-
-function syncPendentes() {
-  const pend = JSON.parse(localStorage.getItem('pendentes') || '[]');
-  if (!pend.length) return;
-  Promise.all(pend.map((row) => appendTransaction(row)))
-    .then(() => {
-      localStorage.removeItem('pendentes');
-      loadAllData();
-    })
-    .catch(() => console.warn('Ainda sem conexão para sincronizar pendentes'));
-}
-
-function populateTransactions(rows) {
-  const filtro = document.getElementById('filtroResponsavel').value;
-  const tbody = document.getElementById('transacoesBody');
+// Preencher tabela de transações
+function populaTabela(categoria = '') {
+  const tbody = document.getElementById('transactionsTableBody');
   tbody.innerHTML = '';
-  rows.slice(1).forEach((cols) => {
-    const responsavel = cols[1];
-    if (filtro && responsavel !== filtro) return;
-    const tr = document.createElement('tr');
-    cols.forEach((c) => {
-      const td = document.createElement('td');
-      td.textContent = c;
-      tr.appendChild(td);
+  transacoes
+    .filter((t) => !categoria || t.categoria === categoria)
+    .forEach((t) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+      <td>${t.data}</td>
+      <td>${t.responsavel}</td>
+      <td>${t.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+      <td>${t.tipo}</td>
+      <td>${t.categoria}</td>
+      <td>${t.descricao}</td>
+    `;
+      tbody.appendChild(tr);
     });
-    tbody.appendChild(tr);
+}
+
+// Atualizar resumo (saldo, receitas, despesas)
+function calculaResumo() {
+  let receita = 0,
+    despesa = 0;
+  transacoes.forEach((t) => {
+    if (t.tipo === 'receita') receita += t.valor;
+    else despesa += t.valor;
+  });
+  const saldo = receita - despesa;
+  document.getElementById('saldoValue').textContent = saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  document.getElementById('receitaValue').textContent = receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  document.getElementById('despesaValue').textContent = despesa.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// Gerar gráfico de barras receitas x despesas por mês
+function criaGraficoBarras() {
+  const ctx = document.getElementById('barChart').getContext('2d');
+  // Agrupa por mês
+  const meses = {};
+  transacoes.forEach((t) => {
+    const mes = t.data.substring(0, 7);
+    if (!meses[mes]) meses[mes] = { receita: 0, despesa: 0 };
+    meses[mes][t.tipo] += t.valor;
+  });
+  const labels = Object.keys(meses);
+  const receitaData = labels.map((m) => meses[m].receita);
+  const despesaData = labels.map((m) => meses[m].despesa);
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Receita', data: receitaData, backgroundColor: 'rgba(76,175,80,0.7)' },
+        { label: 'Despesa', data: despesaData, backgroundColor: 'rgba(244,67,54,0.7)' },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true } },
+    },
+  });
+}
+
+// Gerar gráfico de pizza das despesas por categoria
+function criaGraficoPizza() {
+  const ctx = document.getElementById('pieChart').getContext('2d');
+  const somaPorCategoria = {};
+  transacoes.forEach((t) => {
+    if (t.tipo === 'despesa') somaPorCategoria[t.categoria] = (somaPorCategoria[t.categoria] || 0) + t.valor;
+  });
+  const labels = Object.keys(somaPorCategoria);
+  const data = labels.map((l) => somaPorCategoria[l]);
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: ['#4285F4', '#DB4437', '#F4B400', '#0F9D58', '#AB47BC', '#00ACC1', '#FF7043', '#9E9D24'] }],
+    },
+    options: { responsive: true },
   });
 }
 
 window.onload = () => {
-  document.getElementById('btn-login').onclick = handleAuthClick;
-  document.getElementById('btn-logout').onclick = handleSignoutClick;
-  document.getElementById('filtroResponsavel').onchange = loadAllData;
-  handleClientLoad();
+  calculaResumo();
+  populaFiltroCategorias();
+  populaTabela();
+  criaGraficoBarras();
+  criaGraficoPizza();
+  document.getElementById('filterCategory').addEventListener('change', (e) => populaTabela(e.target.value));
+  document.getElementById('btnLogin').addEventListener('click', () => alert('Implementar login Google aqui.'));
 };
