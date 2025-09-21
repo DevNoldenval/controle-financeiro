@@ -106,6 +106,16 @@
             transform: translateY(-2px);
         }
 
+        .btn-logout {
+            background: #f72585;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .btn-logout:hover {
+            background: #e63946;
+        }
+
         .divider {
             display: flex;
             align-items: center;
@@ -175,6 +185,25 @@
             100% { transform: rotate(360deg); }
         }
 
+        .user-info {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .user-info p {
+            margin-bottom: 10px;
+        }
+
+        .user-info img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+
         @media (max-width: 480px) {
             .login-container {
                 padding: 30px 20px;
@@ -194,31 +223,43 @@
         
         <div class="error-message" id="error-message"></div>
         
-        <form class="login-form" id="login-form">
-            <div class="form-group">
-                <label class="form-label" for="email">E-mail</label>
-                <input type="email" class="form-control" id="email" placeholder="seu@email.com" required>
+        <div id="login-section">
+            <form class="login-form" id="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="email">E-mail</label>
+                    <input type="email" class="form-control" id="email" placeholder="seu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Senha</label>
+                    <input type="password" class="form-control" id="password" placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Entrar
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>ou</span>
             </div>
             
-            <div class="form-group">
-                <label class="form-label" for="password">Senha</label>
-                <input type="password" class="form-control" id="password" placeholder="••••••••" required>
-            </div>
-            
-            <button type="submit" class="btn">
-                <i class="fas fa-sign-in-alt"></i>
-                Entrar
+            <button class="google-btn" id="google-login">
+                <i class="fab fa-google"></i>
+                Entrar com Google
             </button>
-        </form>
-        
-        <div class="divider">
-            <span>ou</span>
         </div>
         
-        <button class="google-btn" id="google-login">
-            <i class="fab fa-google"></i>
-            Entrar com Google
-        </button>
+        <div class="user-info" id="user-info">
+            <img id="user-avatar" src="" alt="Avatar do usuário">
+            <p><strong>Nome:</strong> <span id="user-name"></span></p>
+            <p><strong>E-mail:</strong> <span id="user-email"></span></p>
+            <button class="btn btn-logout" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Sair
+            </button>
+        </div>
         
         <div class="loading" id="loading">
             <i class="fas fa-spinner"></i>
@@ -243,6 +284,14 @@
         function showLoading(show) {
             const loadingElement = document.getElementById('loading');
             loadingElement.style.display = show ? 'block' : 'none';
+        }
+
+        // Função para fazer logout
+        function logout() {
+            localStorage.removeItem('userInfo');
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('user-info').style.display = 'none';
+            document.getElementById('login-form').reset();
         }
 
         // Callback de sucesso do Google Sign-In
@@ -275,72 +324,52 @@
             // Verificar se há um usuário salvo no localStorage
             const savedUser = localStorage.getItem('userInfo');
             if (savedUser) {
-                // Se já estiver logado, redirecionar para o dashboard
-                window.location.href = 'index.html';
-            } else {
-                // Inicializar o Google Sign-In
-                google.accounts.id.initialize({
-                    client_id: CLIENT_ID,
-                    callback: handleCredentialResponse
-                });
-                
-                // Renderizar o botão do Google
-                google.accounts.id.renderButton(
-                    document.getElementById("google-login"),
-                    { 
-                        theme: "outline", 
-                        size: "large",
-                        width: 240,
-                        text: "signin_with",
-                        locale: "pt-BR"
+                try {
+                    const userInfo = JSON.parse(savedUser);
+                    
+                    // Verificar se o token ainda é válido (simulação)
+                    if (userInfo.token && userInfo.email) {
+                        // Mostrar informações do usuário
+                        document.getElementById('user-avatar').src = userInfo.imageUrl;
+                        document.getElementById('user-name').textContent = userInfo.name;
+                        document.getElementById('user-email').textContent = userInfo.email;
+                        
+                        // Esconder formulário de login e mostrar informações do usuário
+                        document.getElementById('login-section').style.display = 'none';
+                        document.getElementById('user-info').style.display = 'block';
+                        
+                        // Configurar botão de logout
+                        document.getElementById('logout-btn').addEventListener('click', logout);
+                        
+                        // Não redirecionar automaticamente
+                        return;
                     }
-                );
-                
-                // Exibir o prompt do Google One Tap
-                google.accounts.id.prompt();
+                } catch (e) {
+                    console.error('Erro ao analisar dados do usuário:', e);
+                }
             }
+            
+            // Inicializar o Google Sign-In
+            google.accounts.id.initialize({
+                client_id: CLIENT_ID,
+                callback: handleCredentialResponse
+            });
+            
+            // Renderizar o botão do Google
+            google.accounts.id.renderButton(
+                document.getElementById("google-login"),
+                { 
+                    theme: "outline", 
+                    size: "large",
+                    width: 240,
+                    text: "signin_with",
+                    locale: "pt-BR"
+                }
+            );
+            
+            // Exibir o prompt do Google One Tap
+            google.accounts.id.prompt();
         };
 
         // Login com formulário
         document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            // Validar campos
-            if (!email || !password) {
-                showError('Por favor, preencha todos os campos.');
-                return;
-            }
-            
-            // Validar formato do e-mail
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showError('Por favor, insira um e-mail válido.');
-                return;
-            }
-            
-            showLoading(true);
-            
-            // Simular requisição de login
-            setTimeout(() => {
-                // Salvar informações do usuário
-                const userInfo = {
-                    id: 'user_' + Date.now(),
-                    name: email.split('@')[0],
-                    email: email,
-                    imageUrl: 'https://via.placeholder.com/150',
-                    token: 'simulated_token_' + Date.now()
-                };
-                
-                // Salvar no localStorage
-                localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                
-                // Redirecionar para o dashboard
-                window.location.href = 'index.html';
-            }, 1500);
-        });
-    </script>
-</body>
-</html>
