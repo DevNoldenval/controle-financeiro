@@ -121,6 +121,22 @@ const config = {
   appsScriptUrl: "https://script.google.com/macros/s/AKfycby9HwziQxRIeLdbu15YMwrbANQHvy6Hp3SQv9_BSpFqULc6CEgaCTcsm4MrTDrOyzPw/exec"
 };
 
+// Função para mostrar overlay de carregamento de forma segura
+function showLoading() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.classList.add('show');
+  }
+}
+
+// Função para esconder overlay de carregamento de forma segura
+function hideLoading() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.classList.remove('show');
+  }
+}
+
 // Inicialização da aplicação
 document.addEventListener('DOMContentLoaded', function() {
     showLoading();
