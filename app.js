@@ -8,6 +8,51 @@ const transacoes = [
   { data: '2025-09-20', responsavel: 'Você', valor: 100, tipo: 'despesa', categoria: 'Alimentação', descricao: 'Almoço' },
 ];
 
+// Função para decodificar token JWT
+function parseJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  return JSON.parse(decodeURIComponent(atob(base64).split('').map(function (c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join('')));
+}
+
+function handleCredentialResponse(response) {
+  const user = parseJwt(response.credential);
+  console.log('Usuário logado:', user);
+  alert(`Bem-vindo, ${user.name}`);
+
+  document.getElementById('buttonDiv').style.display = 'none';
+  document.getElementById('btnLogout').style.display = 'inline-block';
+}
+
+window.onload = () => {
+  google.accounts.id.initialize({
+    client_id: '149224581281-7d5rqr12io40f7rr9mleoit7ttpd1etf.apps.googleusercontent.com',
+    callback: handleCredentialResponse,
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('buttonDiv'),
+    { theme: 'outline', size: 'large' }
+  );
+  google.accounts.id.prompt();
+
+  document.getElementById('btnLogout').onclick = () => {
+    google.accounts.id.disableAutoSelect();
+    alert('Logout efetuado');
+    document.getElementById('buttonDiv').style.display = 'block';
+    document.getElementById('btnLogout').style.display = 'none';
+  };
+
+  calculaResumo();
+  populaFiltroCategorias();
+  populaTabela();
+  criaGraficoBarras();
+  criaGraficoPizza();
+
+  document.getElementById('filterCategory').addEventListener('change', (e) => populaTabela(e.target.value));
+};
+
 // Preencher filtro de categorias
 function populaFiltroCategorias() {
   const filtro = document.getElementById('filterCategory');
@@ -102,13 +147,3 @@ function criaGraficoPizza() {
     options: { responsive: true },
   });
 }
-
-window.onload = () => {
-  calculaResumo();
-  populaFiltroCategorias();
-  populaTabela();
-  criaGraficoBarras();
-  criaGraficoPizza();
-  document.getElementById('filterCategory').addEventListener('change', (e) => populaTabela(e.target.value));
-  document.getElementById('btnLogin').addEventListener('click', () => alert('Implementar login Google aqui.'));
-};
