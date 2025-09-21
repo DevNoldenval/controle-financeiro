@@ -226,60 +226,12 @@
         </div>
     </div>
 
-    <!-- Google Sign-In API -->
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <!-- Nova API Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
         // Configuração do Google Sign-In
         const CLIENT_ID = '149224581281-7d5rqr12io40f7rr9mleoit7ttpd1etf.apps.googleusercontent.com'; // Substitua pelo seu Client ID
         
-        // Inicializar o Google Sign-In
-        function initGoogleSignIn() {
-            gapi.load('auth2', function() {
-                gapi.auth2.init({
-                    client_id: CLIENT_ID,
-                    scope: 'profile email'
-                }).then(function() {
-                    // Renderizar o botão do Google
-                    gapi.signin2.render('google-login', {
-                        'scope': 'profile email',
-                        'width': 240,
-                        'height': 50,
-                        'longtitle': true,
-                        'theme': 'dark',
-                        'onsuccess': onGoogleSignInSuccess,
-                        'onfailure': onGoogleSignInFailure
-                    });
-                });
-            });
-        }
-
-        // Callback de sucesso do Google Sign-In
-        function onGoogleSignInSuccess(googleUser) {
-            const profile = googleUser.getBasicProfile();
-            const authResponse = googleUser.getAuthResponse();
-            
-            // Salvar informações do usuário
-            const userInfo = {
-                id: profile.getId(),
-                name: profile.getName(),
-                email: profile.getEmail(),
-                imageUrl: profile.getImageUrl(),
-                token: authResponse.id_token
-            };
-            
-            // Salvar no localStorage
-            localStorage.setItem('userInfo', JSON.stringify(userInfo));
-            
-            // Redirecionar para o dashboard
-            window.location.href = 'index.html';
-        }
-
-        // Callback de falha do Google Sign-In
-        function onGoogleSignInFailure(error) {
-            console.error('Google Sign-In failed:', error);
-            showError('Falha ao autenticar com Google. Tente novamente.');
-        }
-
         // Função para mostrar erro
         function showError(message) {
             const errorElement = document.getElementById('error-message');
@@ -293,6 +245,31 @@
             loadingElement.style.display = show ? 'block' : 'none';
         }
 
+        // Callback de sucesso do Google Sign-In
+        function handleCredentialResponse(response) {
+            showLoading(true);
+            
+            // Decodificar o token JWT
+            const payload = JSON.parse(atob(response.credential.split('.')[1]));
+            
+            // Salvar informações do usuário
+            const userInfo = {
+                id: payload.sub,
+                name: payload.name,
+                email: payload.email,
+                imageUrl: payload.picture,
+                token: response.credential
+            };
+            
+            // Salvar no localStorage
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            
+            // Redirecionar para o dashboard
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        }
+
         // Verificar se o usuário já está logado
         window.onload = function() {
             // Verificar se há um usuário salvo no localStorage
@@ -302,7 +279,25 @@
                 window.location.href = 'index.html';
             } else {
                 // Inicializar o Google Sign-In
-                initGoogleSignIn();
+                google.accounts.id.initialize({
+                    client_id: CLIENT_ID,
+                    callback: handleCredentialResponse
+                });
+                
+                // Renderizar o botão do Google
+                google.accounts.id.renderButton(
+                    document.getElementById("google-login"),
+                    { 
+                        theme: "outline", 
+                        size: "large",
+                        width: 240,
+                        text: "signin_with",
+                        locale: "pt-BR"
+                    }
+                );
+                
+                // Exibir o prompt do Google One Tap
+                google.accounts.id.prompt();
             }
         };
 
@@ -313,30 +308,38 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            // Simular login (em um app real, você validaria com um backend)
-            if (email && password) {
-                showLoading(true);
-                
-                // Simular requisição de login
-                setTimeout(() => {
-                    // Salvar informações do usuário
-                    const userInfo = {
-                        id: 'user_' + Date.now(),
-                        name: email.split('@')[0],
-                        email: email,
-                        imageUrl: 'https://via.placeholder.com/150',
-                        token: 'simulated_token_' + Date.now()
-                    };
-                    
-                    // Salvar no localStorage
-                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                    
-                    // Redirecionar para o dashboard
-                    window.location.href = 'index.html';
-                }, 1500);
-            } else {
+            // Validar campos
+            if (!email || !password) {
                 showError('Por favor, preencha todos os campos.');
+                return;
             }
+            
+            // Validar formato do e-mail
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Por favor, insira um e-mail válido.');
+                return;
+            }
+            
+            showLoading(true);
+            
+            // Simular requisição de login
+            setTimeout(() => {
+                // Salvar informações do usuário
+                const userInfo = {
+                    id: 'user_' + Date.now(),
+                    name: email.split('@')[0],
+                    email: email,
+                    imageUrl: 'https://via.placeholder.com/150',
+                    token: 'simulated_token_' + Date.now()
+                };
+                
+                // Salvar no localStorage
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                
+                // Redirecionar para o dashboard
+                window.location.href = 'index.html';
+            }, 1500);
         });
     </script>
 </body>
