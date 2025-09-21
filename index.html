@@ -3,421 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinanceApp - Gestão Financeira Pessoal</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Login - FinControl</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #4361ee, #3f37c9);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 30px;
+        }
+
+        .logo i {
+            font-size: 48px;
+            color: #4cc9f0;
+            margin-bottom: 10px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .login-form {
+            margin-top: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4cc9f0;
+            box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.3);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #4cc9f0;
+            color: #3a0ca3;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            background: #3db8e0;
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .divider span {
+            padding: 0 15px;
+            font-size: 14px;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: transparent;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .google-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .google-btn i {
+            font-size: 20px;
+        }
+
+        .error-message {
+            background: rgba(247, 37, 133, 0.2);
+            color: #f72585;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading i {
+            font-size: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content login-modal">
-            <div class="login-header">
-                <div class="login-logo">
-                    <div class="logo-circle">💳</div>
-                    <h1>FinanceApp</h1>
-                </div>
-                <p>Sua gestão financeira pessoal</p>
-            </div>
-            <div class="login-body">
-                <div id="g_id_onload"
-                     data-client_id="149224581281-7d5rqr12io40f7rr9mleoit7ttpd1etf.apps.googleusercontent.com"
-                     data-callback="handleCredentialResponse">
-                </div>
-                <div id="g_id_signin"
-                     data-type="standard"
-                     data-size="large"
-                     data-theme="outline"
-                     data-text="signin_with"
-                     data-shape="rectangular"
-                     data-logo_alignment="left"
-                     data-width="280">
-                </div>
-            </div>
+    <div class="login-container">
+        <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <h1>FinControl</h1>
         </div>
-    </div>
-
-    <!-- Header -->
-    <header class="header" id="header" style="display: none;">
-        <div class="header-content">
-            <div class="header-left">
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <div class="header-logo">
-                    <div class="logo-circle">💳</div>
-                    <span>FinanceApp</span>
-                </div>
-            </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <img id="userPhoto" class="user-avatar" alt="Foto do usuário">
-                    <span id="userName" class="user-name"></span>
-                </div>
-                <button id="logoutBtn" class="btn btn--outline btn--sm">
-                    <span>Sair</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar" style="display: none;">
-        <nav class="nav">
-            <button class="nav-item active" data-screen="dashboard">
-                <div class="nav-icon">📊</div>
-                <span>Dashboard</span>
-            </button>
-            <button class="nav-item" data-screen="lancamentos">
-                <div class="nav-icon">💰</div>
-                <span>Lançamentos</span>
-            </button>
-            <button class="nav-item" data-screen="cartoes">
-                <div class="nav-icon">💳</div>
-                <span>Cartões</span>
-            </button>
-            <button class="nav-item" data-screen="usuarios">
-                <div class="nav-icon">👥</div>
-                <span>Usuários</span>
-            </button>
-        </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content" id="mainContent" style="display: none;">
         
-        <!-- Dashboard Screen -->
-        <div id="dashboardScreen" class="screen active">
-            <div class="screen-header">
-                <h2>Dashboard Financeiro</h2>
-                <p>Visão geral das suas finanças</p>
+        <p>Acesse sua conta para gerenciar suas finanças</p>
+        
+        <div class="error-message" id="error-message"></div>
+        
+        <form class="login-form" id="login-form">
+            <div class="form-group">
+                <label class="form-label" for="email">E-mail</label>
+                <input type="email" class="form-control" id="email" placeholder="seu@email.com" required>
             </div>
-
-            <!-- Summary Cards -->
-            <div class="summary-cards">
-                <div class="summary-card balance">
-                    <div class="card-icon">💰</div>
-                    <div class="card-content">
-                        <h3>Saldo Total</h3>
-                        <p class="amount" id="saldoTotal">R$ 0,00</p>
-                        <span class="change positive" id="saldoChange">+0,0%</span>
-                    </div>
-                </div>
-                <div class="summary-card income">
-                    <div class="card-icon">📈</div>
-                    <div class="card-content">
-                        <h3>Receitas</h3>
-                        <p class="amount income-text" id="receitasMes">R$ 0,00</p>
-                        <span class="period">Este mês</span>
-                    </div>
-                </div>
-                <div class="summary-card expense">
-                    <div class="card-icon">📉</div>
-                    <div class="card-content">
-                        <h3>Despesas</h3>
-                        <p class="amount expense-text" id="despesasMes">R$ 0,00</p>
-                        <span class="period">Este mês</span>
-                    </div>
-                </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">Senha</label>
+                <input type="password" class="form-control" id="password" placeholder="••••••••" required>
             </div>
-
-            <!-- Charts Section -->
-            <div class="charts-section">
-                <div class="chart-card">
-                    <h3>Receitas vs Despesas (6 meses)</h3>
-                    <canvas id="receitasDespesasChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>Despesas por Categoria</h3>
-                    <canvas id="categoriaChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Recent Transactions -->
-            <div class="recent-transactions">
-                <h3>Últimas Transações</h3>
-                <div id="recentTransactionsList" class="transactions-list">
-                    <!-- Transações serão inseridas aqui -->
-                </div>
-            </div>
-
-            <!-- Alerts -->
-            <div class="alerts-section" id="alertsSection">
-                <h3>Alertas</h3>
-                <div id="alertsList" class="alerts-list">
-                    <!-- Alertas serão inseridos aqui -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Lançamentos Screen -->
-        <div id="lancamentosScreen" class="screen">
-            <div class="screen-header">
-                <h2>Lançamentos</h2>
-                <p>Registre suas receitas e despesas</p>
-            </div>
-
-            <div class="form-container">
-                <form id="transactionForm" class="transaction-form">
-                    <!-- Tipo Toggle -->
-                    <div class="form-group tipo-toggle">
-                        <label class="toggle-label">
-                            <input type="radio" name="tipo" value="receita" checked>
-                            <span class="toggle-option receita">Receita</span>
-                        </label>
-                        <label class="toggle-label">
-                            <input type="radio" name="tipo" value="despesa">
-                            <span class="toggle-option despesa">Despesa</span>
-                        </label>
-                    </div>
-
-                    <!-- Form Grid -->
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="dataTransacao">Data</label>
-                            <input type="date" id="dataTransacao" name="data" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="valorTransacao">Valor</label>
-                            <input type="text" id="valorTransacao" name="valor" placeholder="R$ 0,00" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="categoriaTransacao">Categoria</label>
-                            <select id="categoriaTransacao" name="categoria" required>
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="usuarioTransacao">Usuário</label>
-                            <select id="usuarioTransacao" name="usuario" required>
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label for="descricaoTransacao">Descrição</label>
-                            <textarea id="descricaoTransacao" name="descricao" placeholder="Descreva a transação..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="formaPagamento">Forma de Pagamento</label>
-                            <select id="formaPagamento" name="forma_pagamento" required>
-                                <option value="">Selecione...</option>
-                                <option value="dinheiro">Dinheiro</option>
-                                <option value="pix">PIX</option>
-                                <option value="debito">Débito</option>
-                                <option value="credito">Crédito</option>
-                            </select>
-                        </div>
-
-                        <!-- Seção do Cartão (aparece quando crédito/débito) -->
-                        <div id="cartaoSection" class="form-group cartao-section" style="display: none;">
-                            <label for="cartaoTransacao">Cartão</label>
-                            <select id="cartaoTransacao" name="cartao">
-                                <option value="">Selecione o cartão...</option>
-                            </select>
-                        </div>
-
-                        <!-- Seção de Parcelamento (apenas crédito) -->
-                        <div id="parcelamentoSection" class="parcelamento-section" style="display: none;">
-                            <div class="form-group">
-                                <label class="parcelas-toggle">
-                                    <input type="radio" name="tipoPagamento" value="avista" checked>
-                                    <span>À Vista</span>
-                                </label>
-                                <label class="parcelas-toggle">
-                                    <input type="radio" name="tipoPagamento" value="parcelado">
-                                    <span>Parcelado</span>
-                                </label>
-                            </div>
-
-                            <div id="parcelasInput" class="form-group" style="display: none;">
-                                <label for="numeroParcelas">Número de Parcelas</label>
-                                <input type="range" id="numeroParcelas" name="parcelas" min="2" max="48" value="2">
-                                <div class="parcelas-info">
-                                    <span id="parcelasDisplay">2x</span>
-                                    <span id="valorParcela">R$ 0,00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="form-actions">
-                        <button type="button" class="btn btn--outline" id="clearFormBtn">Limpar</button>
-                        <button type="submit" class="btn btn--primary" id="saveTransactionBtn">
-                            <span>Salvar Transação</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Lista de Transações -->
-            <div class="transactions-container">
-                <div class="transactions-header">
-                    <h3>Transações Recentes</h3>
-                    <div class="transactions-filters">
-                        <input type="search" id="searchTransactions" placeholder="Buscar transações...">
-                        <select id="filterPeriodo">
-                            <option value="">Todos os períodos</option>
-                            <option value="hoje">Hoje</option>
-                            <option value="semana">Esta semana</option>
-                            <option value="mes">Este mês</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="transactionsList" class="transactions-list">
-                    <!-- Transações serão inseridas aqui -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Cartões Screen -->
-        <div id="cartoesScreen" class="screen">
-            <div class="screen-header">
-                <h2>Meus Cartões</h2>
-                <p>Gerencie seus cartões de crédito e débito</p>
-            </div>
-
-            <!-- Botão Adicionar Cartão -->
-            <button class="btn btn--primary add-card-btn" id="addCardBtn">
-                <span>+ Adicionar Cartão</span>
+            
+            <button type="submit" class="btn">
+                <i class="fas fa-sign-in-alt"></i>
+                Entrar
             </button>
-
-            <!-- Grid de Cartões -->
-            <div id="cardsGrid" class="cards-grid">
-                <!-- Cartões serão inseridos aqui -->
-            </div>
-
-            <!-- Modal Novo Cartão -->
-            <div id="cardModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 id="cardModalTitle">Novo Cartão</h3>
-                        <button class="modal-close" id="closeCardModal">&times;</button>
-                    </div>
-                    <form id="cardForm" class="card-form">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="nomeCartao">Nome do Cartão</label>
-                                <input type="text" id="nomeCartao" name="nome" placeholder="Ex: Nubank Roxinho" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="ultimosDigitos">Últimos 4 dígitos</label>
-                                <input type="text" id="ultimosDigitos" name="ultimos_digitos" placeholder="1234" maxlength="4" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="tipoCartao">Tipo</label>
-                                <select id="tipoCartao" name="tipo" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="credito">Crédito</option>
-                                    <option value="debito">Débito</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group" id="limiteGroup">
-                                <label for="limiteCartao">Limite</label>
-                                <input type="text" id="limiteCartao" name="limite" placeholder="R$ 0,00">
-                            </div>
-
-                            <div class="form-group" id="vencimentoGroup">
-                                <label for="diaVencimento">Dia Vencimento</label>
-                                <select id="diaVencimento" name="dia_vencimento">
-                                    <option value="">Selecione...</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group" id="dataBoaGroup">
-                                <label for="dataBoa">Data Boa</label>
-                                <select id="dataBoa" name="data_boa">
-                                    <option value="">Selecione...</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="corCartao">Cor</label>
-                                <input type="color" id="corCartao" name="cor" value="#8A05BE">
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn btn--outline" id="cancelCardBtn">Cancelar</button>
-                            <button type="submit" class="btn btn--primary">
-                                <span>Salvar Cartão</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+        </form>
+        
+        <div class="divider">
+            <span>ou</span>
         </div>
-
-        <!-- Usuários Screen -->
-        <div id="usuariosScreen" class="screen">
-            <div class="screen-header">
-                <h2>Usuários</h2>
-                <p>Gerencie os usuários do sistema</p>
-            </div>
-
-            <!-- Botão Adicionar Usuário -->
-            <button class="btn btn--primary add-user-btn" id="addUserBtn">
-                <span>+ Adicionar Usuário</span>
-            </button>
-
-            <!-- Grid de Usuários -->
-            <div id="usersGrid" class="users-grid">
-                <!-- Usuários serão inseridos aqui -->
-            </div>
-
-            <!-- Modal Novo Usuário -->
-            <div id="userModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 id="userModalTitle">Novo Usuário</h3>
-                        <button class="modal-close" id="closeUserModal">&times;</button>
-                    </div>
-                    <form id="userForm" class="user-form">
-                        <div class="form-group">
-                            <label for="nomeUsuario">Nome Completo</label>
-                            <input type="text" id="nomeUsuario" name="nome" placeholder="Ex: João Silva" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="apelidoUsuario">Apelido</label>
-                            <input type="text" id="apelidoUsuario" name="apelido" placeholder="Ex: João" required>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn btn--outline" id="cancelUserBtn">Cancelar</button>
-                            <button type="submit" class="btn btn--primary">
-                                <span>Salvar Usuário</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+        
+        <button class="google-btn" id="google-login">
+            <i class="fab fa-google"></i>
+            Entrar com Google
+        </button>
+        
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Carregando...</p>
         </div>
-    </main>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="toast">
-        <span id="toastMessage"></span>
     </div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-spinner"></div>
-        <p>Carregando...</p>
-    </div>
+    <!-- Google Sign-In API -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script>
+        // Configuração do Google Sign-In
+        const CLIENT_ID = 'SEU_CLIENT_ID_DO_GOOGLE'; // Substitua pelo seu Client ID
+        
+        // Inicializar o Google Sign-In
+        function initGoogleSignIn() {
+            gapi.load('auth2', function() {
+                gapi.auth2.init({
+                    client_id: CLIENT_ID,
+                    scope: 'profile email'
+                }).then(function() {
+                    // Renderizar o botão do Google
+                    gapi.signin2.render('google-login', {
+                        'scope': 'profile email',
+                        'width': 240,
+                        'height': 50,
+                        'longtitle': true,
+                        'theme': 'dark',
+                        'onsuccess': onGoogleSignInSuccess,
+                        'onfailure': onGoogleSignInFailure
+                    });
+                });
+            });
+        }
 
-    <script src="app.js" defer></script>
+        // Callback de sucesso do Google Sign-In
+        function onGoogleSignInSuccess(googleUser) {
+            const profile = googleUser.getBasicProfile();
+            const authResponse = googleUser.getAuthResponse();
+            
+            // Salvar informações do usuário
+            const userInfo = {
+                id: profile.getId(),
+                name: profile.getName(),
+                email: profile.getEmail(),
+                imageUrl: profile.getImageUrl(),
+                token: authResponse.id_token
+            };
+            
+            // Salvar no localStorage
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            
+            // Redirecionar para o dashboard
+            window.location.href = 'index.html';
+        }
 
+        // Callback de falha do Google Sign-In
+        function onGoogleSignInFailure(error) {
+            console.error('Google Sign-In failed:', error);
+            showError('Falha ao autenticar com Google. Tente novamente.');
+        }
+
+        // Função para mostrar erro
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        // Função para mostrar loading
+        function showLoading(show) {
+            const loadingElement = document.getElementById('loading');
+            loadingElement.style.display = show ? 'block' : 'none';
+        }
+
+        // Verificar se o usuário já está logado
+        window.onload = function() {
+            // Verificar se há um usuário salvo no localStorage
+            const savedUser = localStorage.getItem('userInfo');
+            if (savedUser) {
+                // Se já estiver logado, redirecionar para o dashboard
+                window.location.href = 'index.html';
+            } else {
+                // Inicializar o Google Sign-In
+                initGoogleSignIn();
+            }
+        };
+
+        // Login com formulário
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Simular login (em um app real, você validaria com um backend)
+            if (email && password) {
+                showLoading(true);
+                
+                // Simular requisição de login
+                setTimeout(() => {
+                    // Salvar informações do usuário
+                    const userInfo = {
+                        id: 'user_' + Date.now(),
+                        name: email.split('@')[0],
+                        email: email,
+                        imageUrl: 'https://via.placeholder.com/150',
+                        token: 'simulated_token_' + Date.now()
+                    };
+                    
+                    // Salvar no localStorage
+                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    
+                    // Redirecionar para o dashboard
+                    window.location.href = 'index.html';
+                }, 1500);
+            } else {
+                showError('Por favor, preencha todos os campos.');
+            }
+        });
+    </script>
 </body>
 </html>
