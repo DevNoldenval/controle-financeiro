@@ -292,6 +292,8 @@
             document.getElementById('login-section').style.display = 'block';
             document.getElementById('user-info').style.display = 'none';
             document.getElementById('login-form').reset();
+            // Re-inicializar o Google Sign-In após logout
+            initializeGoogleSignIn();
         }
 
         // Callback de sucesso do Google Sign-In
@@ -319,37 +321,8 @@
             }, 1000);
         }
 
-        // Verificar se o usuário já está logado
-        window.onload = function() {
-            // Verificar se há um usuário salvo no localStorage
-            const savedUser = localStorage.getItem('userInfo');
-            if (savedUser) {
-                try {
-                    const userInfo = JSON.parse(savedUser);
-                    
-                    // Verificar se o token ainda é válido (simulação)
-                    if (userInfo.token && userInfo.email) {
-                        // Mostrar informações do usuário
-                        document.getElementById('user-avatar').src = userInfo.imageUrl;
-                        document.getElementById('user-name').textContent = userInfo.name;
-                        document.getElementById('user-email').textContent = userInfo.email;
-                        
-                        // Esconder formulário de login e mostrar informações do usuário
-                        document.getElementById('login-section').style.display = 'none';
-                        document.getElementById('user-info').style.display = 'block';
-                        
-                        // Configurar botão de logout
-                        document.getElementById('logout-btn').addEventListener('click', logout);
-                        
-                        // Não redirecionar automaticamente
-                        return;
-                    }
-                } catch (e) {
-                    console.error('Erro ao analisar dados do usuário:', e);
-                }
-            }
-            
-            // Inicializar o Google Sign-In
+        // Função para inicializar o Google Sign-In
+        function initializeGoogleSignIn() {
             google.accounts.id.initialize({
                 client_id: CLIENT_ID,
                 callback: handleCredentialResponse
@@ -369,7 +342,85 @@
             
             // Exibir o prompt do Google One Tap
             google.accounts.id.prompt();
+        }
+
+        // Verificar se o usuário já está logado
+        window.onload = function() {
+            // Verificar se há um usuário salvo no localStorage
+            const savedUser = localStorage.getItem('userInfo');
+            
+            if (savedUser) {
+                try {
+                    const userInfo = JSON.parse(savedUser);
+                    
+                    // Verificar se o token ainda é válido (simulação)
+                    if (userInfo.token && userInfo.email) {
+                        // Mostrar informações do usuário
+                        document.getElementById('user-avatar').src = userInfo.imageUrl;
+                        document.getElementById('user-name').textContent = userInfo.name;
+                        document.getElementById('user-email').textContent = userInfo.email;
+                        
+                        // Esconder formulário de login e mostrar informações do usuário
+                        document.getElementById('login-section').style.display = 'none';
+                        document.getElementById('user-info').style.display = 'block';
+                        
+                        // Configurar botão de logout
+                        document.getElementById('logout-btn').addEventListener('click', logout);
+                        
+                        // NÃO REDIRECIONAR AUTOMATICAMENTE
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Erro ao analisar dados do usuário:', e);
+                    // Se houver erro, remover o item inválido do localStorage
+                    localStorage.removeItem('userInfo');
+                }
+            }
+            
+            // Se não houver usuário salvo ou se os dados forem inválidos, inicializar o Google Sign-In
+            initializeGoogleSignIn();
         };
 
         // Login com formulário
         document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Validar campos
+            if (!email || !password) {
+                showError('Por favor, preencha todos os campos.');
+                return;
+            }
+            
+            // Validar formato do e-mail
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Por favor, insira um e-mail válido.');
+                return;
+            }
+            
+            showLoading(true);
+            
+            // Simular requisição de login
+            setTimeout(() => {
+                // Salvar informações do usuário
+                const userInfo = {
+                    id: 'user_' + Date.now(),
+                    name: email.split('@')[0],
+                    email: email,
+                    imageUrl: 'https://via.placeholder.com/150',
+                    token: 'simulated_token_' + Date.now()
+                };
+                
+                // Salvar no localStorage
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                
+                // Redirecionar para o dashboard
+                window.location.href = 'index.html';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
