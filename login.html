@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FinControl</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #4361ee, #3f37c9);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 30px;
+        }
+
+        .logo i {
+            font-size: 48px;
+            color: #4cc9f0;
+            margin-bottom: 10px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .login-form {
+            margin-top: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4cc9f0;
+            box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.3);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #4cc9f0;
+            color: #3a0ca3;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            background: #3db8e0;
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .divider span {
+            padding: 0 15px;
+            font-size: 14px;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: transparent;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .google-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .google-btn i {
+            font-size: 20px;
+        }
+
+        .error-message {
+            background: rgba(247, 37, 133, 0.2);
+            color: #f72585;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading i {
+            font-size: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <h1>FinControl</h1>
+        </div>
+        
+        <p>Acesse sua conta para gerenciar suas finanças</p>
+        
+        <div class="error-message" id="error-message"></div>
+        
+        <form class="login-form" id="login-form">
+            <div class="form-group">
+                <label class="form-label" for="email">E-mail</label>
+                <input type="email" class="form-control" id="email" placeholder="seu@email.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">Senha</label>
+                <input type="password" class="form-control" id="password" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="btn">
+                <i class="fas fa-sign-in-alt"></i>
+                Entrar
+            </button>
+        </form>
+        
+        <div class="divider">
+            <span>ou</span>
+        </div>
+        
+        <button class="google-btn" id="google-login">
+            <i class="fab fa-google"></i>
+            Entrar com Google
+        </button>
+        
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Carregando...</p>
+        </div>
+    </div>
+
+    <!-- Google Sign-In API -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script>
+        // Configuração do Google Sign-In
+        const CLIENT_ID = 'SEU_CLIENT_ID_DO_GOOGLE'; // Substitua pelo seu Client ID
+        
+        // Inicializar o Google Sign-In
+        function initGoogleSignIn() {
+            gapi.load('auth2', function() {
+                gapi.auth2.init({
+                    client_id: CLIENT_ID,
+                    scope: 'profile email'
+                }).then(function() {
+                    // Renderizar o botão do Google
+                    gapi.signin2.render('google-login', {
+                        'scope': 'profile email',
+                        'width': 240,
+                        'height': 50,
+                        'longtitle': true,
+                        'theme': 'dark',
+                        'onsuccess': onGoogleSignInSuccess,
+                        'onfailure': onGoogleSignInFailure
+                    });
+                });
+            });
+        }
+
+        // Callback de sucesso do Google Sign-In
+        function onGoogleSignInSuccess(googleUser) {
+            const profile = googleUser.getBasicProfile();
+            const authResponse = googleUser.getAuthResponse();
+            
+            // Salvar informações do usuário
+            const userInfo = {
+                id: profile.getId(),
+                name: profile.getName(),
+                email: profile.getEmail(),
+                imageUrl: profile.getImageUrl(),
+                token: authResponse.id_token
+            };
+            
+            // Salvar no localStorage
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            
+            // Redirecionar para o dashboard
+            window.location.href = 'index.html';
+        }
+
+        // Callback de falha do Google Sign-In
+        function onGoogleSignInFailure(error) {
+            console.error('Google Sign-In failed:', error);
+            showError('Falha ao autenticar com Google. Tente novamente.');
+        }
+
+        // Função para mostrar erro
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        // Função para mostrar loading
+        function showLoading(show) {
+            const loadingElement = document.getElementById('loading');
+            loadingElement.style.display = show ? 'block' : 'none';
+        }
+
+        // Verificar se o usuário já está logado
+        window.onload = function() {
+            // Verificar se há um usuário salvo no localStorage
+            const savedUser = localStorage.getItem('userInfo');
+            if (savedUser) {
+                // Se já estiver logado, redirecionar para o dashboard
+                window.location.href = 'index.html';
+            } else {
+                // Inicializar o Google Sign-In
+                initGoogleSignIn();
+            }
+        };
+
+        // Login com formulário
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Simular login (em um app real, você validaria com um backend)
+            if (email && password) {
+                showLoading(true);
+                
+                // Simular requisição de login
+                setTimeout(() => {
+                    // Salvar informações do usuário
+                    const userInfo = {
+                        id: 'user_' + Date.now(),
+                        name: email.split('@')[0],
+                        email: email,
+                        imageUrl: 'https://via.placeholder.com/150',
+                        token: 'simulated_token_' + Date.now()
+                    };
+                    
+                    // Salvar no localStorage
+                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    
+                    // Redirecionar para o dashboard
+                    window.location.href = 'index.html';
+                }, 1500);
+            } else {
+                showError('Por favor, preencha todos os campos.');
+            }
+        });
+    </script>
+</body>
+</html>
